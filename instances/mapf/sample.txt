@@ -4,7 +4,7 @@ map_file=den520d.map
 ## map_file=den520d.map
 
 ## number of agents
-agents=50
+agents=500
 
 ## ==== custom =======
 ## seed of randomization

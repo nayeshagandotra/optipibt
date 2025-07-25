@@ -231,29 +231,29 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
   std::copy_if(A.begin(), A.end(), std::back_inserter(agents_subset), 
                 [ai](Agent* agent) { return agent != ai; });  
 
-  // compare two nodes
-  auto compare = [&](Node* const v, Node* const u) {
-    int d_v = pathDist(ai->id, v);
-    int d_u = pathDist(ai->id, u);
-    if (d_v != d_u) return d_v < d_u;
-    // tie break
-    if (occupied_now[v->id] != nullptr && occupied_now[u->id] == nullptr)
-      return false;
-    if (occupied_now[v->id] == nullptr && occupied_now[u->id] != nullptr)
-      return true;
-    return false;
-  };
+  // // compare two nodes
+  // auto compare = [&](Node* const v, Node* const u) {
+  //   int d_v = pathDist(ai->id, v);
+  //   int d_u = pathDist(ai->id, u);
+  //   if (d_v != d_u) return d_v < d_u;
+  //   // tie break
+  //   if (occupied_now[v->id] != nullptr && occupied_now[u->id] == nullptr)
+  //     return false;
+  //   if (occupied_now[v->id] == nullptr && occupied_now[u->id] != nullptr)
+  //     return true;
+  //   return false;
+  // };
 
-  // get candidates
-  Nodes C = ai->v_now->neighbor;
-  C.push_back(ai->v_now);
-  // randomize
-  std::shuffle(C.begin(), C.end(), *MT);
-  // sort
-  std::sort(C.begin(), C.end(), compare);
+  // // get candidates
+  // Nodes C = ai->v_now->neighbor;
+  // C.push_back(ai->v_now);
+  // // randomize
+  // std::shuffle(C.begin(), C.end(), *MT);
+  // // sort
+  // std::sort(C.begin(), C.end(), compare);
 
   // calculate ideal dist for penalty purposes
-  int ideal_dist = pathDist(ai->id, C[0]);  // Distance to goal if taking ideal move
+  int ideal_dist = pathDist(ai->id, ai->C[0]);  // Distance to goal if taking ideal move
   int actual_dist;
   int round_bestp = 100000;
   bool group_exists = false;
@@ -263,7 +263,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
   int n_skipped_acts = 0;
 
   
-  for (auto u: C) {
+  for (auto u: ai->C) {
     refresh_lists(A); // clear the results from the last PIBT call
     // std::cout << is_expired() << std::endl;
     if (is_expired()){
@@ -346,7 +346,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
       if (failed){
         n_skipped_acts += 1;
         // we tried moving to this action and moving other agents accordingly, but agent ak is stuck
-        ai->v_next = nullptr;
+        // ai->v_next = nullptr;
         continue;
       }
       round_bestp = std::min(round_bestp, action_penalty + bas);
@@ -380,8 +380,8 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
   // either all moves have failed or next best has been found
   if (n_skipped_acts == n_avail_acts){
     // failed to secure node
-    occupied_next[ai->v_now->id] = ai;
-    ai->v_next = ai->v_now;
+    // occupied_next[ai->v_now->id] = ai;
+    // ai->v_next = ai->v_now;
     return std::make_pair(true, 100000);
   }
   return std::make_pair(false, round_bestp);
