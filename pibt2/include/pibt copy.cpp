@@ -32,22 +32,22 @@ void PIBT::print_penalty(const std::string& filename, std::vector<int> penalties
 int PIBT::calculate_penalty(Agent* a) {
 
   // A two nodes
-  auto compare = [&](Node* const v, Node* const u) {
-    int d_v = pathDist(a->id, v);
-    int d_u = pathDist(a->id, u);
-    if (d_v != d_u) return d_v < d_u;
-    // tie break
-    if (occupied_now[v->id] != nullptr && occupied_now[u->id] == nullptr)
-      return false;
-    if (occupied_now[v->id] == nullptr && occupied_now[u->id] != nullptr)
-      return true;
-    return false;
-  };
+  // auto compare = [&](Node* const v, Node* const u) {
+  //   int d_v = pathDist(a->id, v);
+  //   int d_u = pathDist(a->id, u);
+  //   if (d_v != d_u) return d_v < d_u;
+  //   // tie break
+  //   if (occupied_now[v->id] != nullptr && occupied_now[u->id] == nullptr)
+  //     return false;
+  //   if (occupied_now[v->id] == nullptr && occupied_now[u->id] != nullptr)
+  //     return true;
+  //   return false;
+  // };
 
-  Nodes C = a->v_now->neighbor;
-  C.push_back(a->v_now);
+  // Nodes C = a->v_now->neighbor;
+  // C.push_back(a->v_now);
 
-  std::sort(C.begin(), C.end(), compare);
+  // std::sort(C.begin(), C.end(), compare);
 
   // calculate ideal dist for penalty purposes
   int ideal_dist = pathDist(a->id, a->C[0]);  // Distance to goal if taking ideal move
@@ -74,10 +74,7 @@ void PIBT::group_optipibt(Agents A){
     double overall_deadline = time_limit_ms;
     for (size_t gn = 0; gn < groups.size(); ++gn) {
 
-        // if (is_expired()) break;
-        if (is_expired()){
-          return;
-        }
+        if (is_expired()) break;
 
         // std::cout << "i = " << i << std::endl;
         group_no = gn;
@@ -119,7 +116,7 @@ void PIBT::group_optipibt(Agents A){
 
         refresh_lists(A_copy);
 
-    //     // If new groups are added, they will be processed in the next iteration
+        // If new groups are added, they will be processed in the next iteration
         for (auto a : A_copy) {
             occupied_next[a->v_next_best->id] = a; // Reserve
             a->v_next = a->v_next_best;
@@ -265,9 +262,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
   
   for (auto u: C) {
     refresh_lists(A); // clear the results from the last PIBT call
-    // std::cout << is_expired() << std::endl;
-    if (is_expired()){
-      std::cout << "OptiPIBT expired, returning failure" << std::endl;
+    if (is_expired_ns()){
       return std::make_pair(true, 100000);
     }
     n_avail_acts += 1;
@@ -279,7 +274,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
     }
     // if (action_penalty > ai->penalty){
     //   n_skipped_acts += 1;
-    //   continue; //bad action because pibt found better ->tiebreak
+    //   continue; //bad action because pibt found better
     // }
     if (occupied_next[u->id] != nullptr && occupied_next[u->id] != ai){
       // The agent at vertex 'id' in occupied_next is not nullptr and not in A
@@ -346,7 +341,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
       if (failed){
         n_skipped_acts += 1;
         // we tried moving to this action and moving other agents accordingly, but agent ak is stuck
-        ai->v_next = nullptr;
+        // ai->v_next = nullptr;
         continue;
       }
       round_bestp = std::min(round_bestp, action_penalty + bas);
@@ -370,7 +365,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
       for (auto agent : A_copy) {
         // Set the agent's v_next_best to v_next (which should be correct atm)
         agent->v_next_best = agent->v_next; 
-        // agent->penalty = agent->action_penalty;
+        agent->penalty = agent->action_penalty;
       }
       if (best_penalty == 0){
         return std::make_pair(false, round_bestp);
@@ -380,8 +375,8 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
   // either all moves have failed or next best has been found
   if (n_skipped_acts == n_avail_acts){
     // failed to secure node
-    occupied_next[ai->v_now->id] = ai;
-    ai->v_next = ai->v_now;
+    // occupied_next[ai->v_now->id] = ai;
+    // ai->v_next = ai->v_now;
     return std::make_pair(true, 100000);
   }
   return std::make_pair(false, round_bestp);
@@ -401,7 +396,6 @@ void PIBT::refresh_lists(Agents A){
 void PIBT::run()
 {
   Agents A;
-  std::cout << "Running " << PIBT::SOLVER_NAME << " solver..." << std::endl;
   // initialize
   for (int i = 0; i < P->getNum(); ++i) {
     Node* s = P->getStart(i);
@@ -428,9 +422,8 @@ void PIBT::run()
   while (true) {
     info(" ", "elapsed:", getSolverElapsedTime(), ", timestep:", timestep);
 
-    // if (timestep >= 5){
+    // if (timestep >= 285){
     //   std::cout << "pause" << std::endl;
-    //   break;
     // }
     timestep_penalty = 0;
     std::sort(A.begin(), A.end(), compareAgents);
@@ -441,11 +434,11 @@ void PIBT::run()
       a->v_next_best = a->v_next;
     }
 
-    // int pen1 = 0;
-    // for (auto a: A){
-    //   pen1 += calculate_penalty(a);
-    // }
-    // pens1.push_back(pen1);
+    int pen1 = 0;
+    for (auto a: A){
+      pen1 += calculate_penalty(a);
+    }
+    pens1.push_back(pen1);
     groups_copy = groups;
     // plan one step using optipibt
 
@@ -497,16 +490,16 @@ void PIBT::run()
     // success
     if (check_goal_cond) {
       solved = true;
-      // print_penalty("costs1.txt", pens1);
+      print_penalty("costs1.txt", pens1);
 
-      // int i = 0;
-      // for (const auto& pen : pens) {
-      //     // Generate dynamic filename
-      //     std::string filename = "costs2" + std::to_string(i) + ".txt";
-      //     // Call print_penalty with the generated filename
-      //     print_penalty(filename, pen);
-      //     ++i;
-      // }
+      int i = 0;
+      for (const auto& pen : pens) {
+          // Generate dynamic filename
+          std::string filename = "costs2" + std::to_string(i) + ".txt";
+          // Call print_penalty with the generated filename
+          print_penalty(filename, pen);
+          ++i;
+      }
 
     }
 
@@ -565,7 +558,7 @@ bool PIBT::funcPIBT(Agent* ai, Agent* aj)
       continue;
     } 
     if (aj != nullptr && u == aj->v_now){
-      addToGroup(ai, aj, true);
+      // addToGroup(ai, aj);
       continue;  //prevents swap conflict
     } 
 
@@ -609,7 +602,7 @@ bool PIBT::funcPIBT(Agent* ai, Agent* aj)
   // find penalty
   actual_dist = pathDist(ai->id, ai->v_next);
   diff = actual_dist - ideal_dist;
-  timestep_penalty += diff; //0 if equal
+  this->timestep_penalty += diff; //0 if equal
   ai->penalty = diff;
   return false;
 }

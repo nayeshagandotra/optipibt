@@ -13,6 +13,8 @@
 #include <iostream>
 #include <algorithm>
 #include <set>
+#include <chrono> // For std::chrono utilities
+
 
 class PIBT : public MAPF_Solver
 {
@@ -34,8 +36,11 @@ private:
     int elapsed;        // eta
     int init_d;         // initial distance
     float tie_breaker;  // epsilon, tie-breaker
-    bool is_conflicting; //should we recurse through all the actions?
+    bool is_constrained; //should we recurse through all the actions?
     Agents* group;        // group this belongs to
+    int penalty;
+    int action_penalty;
+    Nodes C;
   };
 
   // <node-id, agent>, whether the node is occupied or not
@@ -47,12 +52,20 @@ private:
   using Groups = std::vector<Agents*>;
 
   Groups groups;
+  Groups groups_copy;
 
   // new additions
   volatile int timestep_penalty;
   volatile int best_penalty;
   volatile int group_no;
+  int num_grouped_agents;
 
+  std::vector<int> pens1; //logging
+  std::vector<int> pens2; //logging
+
+  // Initialize pens with the appropriate number of inner vectors
+  std::vector<std::vector<int>> pens;
+  
   static bool compareAgents(const Agent* a, const Agent* b) {
         if (a->elapsed != b->elapsed) return a->elapsed > b->elapsed;
         if (a->init_d != b->init_d) return a->init_d > b->init_d;
@@ -63,7 +76,7 @@ private:
   bool disable_dist_init = false;
 
   // result of priority inheritance: true -> valid, false -> invalid
-  bool addToGroup(Agent* ai, Agent* aj); //returns if there's a new addition to the group
+  bool addToGroup(Agent* ai, Agent* aj, bool del_group); //returns if there's a new addition to the group
   bool funcPIBT(Agent* ai, Agent* aj = nullptr);
 
   // plan one step
@@ -72,7 +85,7 @@ private:
   // main optimal function
   std::pair<bool, int> OptiPIBT(Agents A, Agent* aj, int accumulated_penalty);
   void group_optipibt(Agents A);
-  void print_penalty(const std::string& filename, int penalty);
+  void print_penalty(const std::string& filename, std::vector<int> penalties);
   int calculate_penalty(Agent* a);
 
   // clear lists and update so we can run again

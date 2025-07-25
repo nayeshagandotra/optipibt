@@ -318,42 +318,42 @@ def plot_success_rates(output_csv):
     plt.close()
 
 if __name__ == "__main__":
-    original_instance_file = "instances/mapf/sample.txt"  # Original instance file path
-    # solvers = ["PIBT", "PIBTOLD", "HCA", "PushAndSwap"]  # List of solvers to test
-    solvers = ["PIBT", "PIBTOLD"]
-    num_runs = 10  # Number of experiments per solver per number of agents
-    output_csv = "results.csv"  # Output CSV file name
+    # original_instance_file = "instances/mapf/sample.txt"  # Original instance file path
+    # # solvers = ["PIBT", "PIBTOLD", "HCA", "PushAndSwap"]  # List of solvers to test
+    # solvers = ["PIBT", "PIBTOLD"]
+    # num_runs = 10  # Number of experiments per solver per number of agents
+    # output_csv = "results.csv"  # Output CSV file name
 
-    # # Clear the previous CSV file if it exists
-    # if os.path.exists(output_csv):
-    #     os.remove(output_csv)
+    # # # Clear the previous CSV file if it exists
+    # # if os.path.exists(output_csv):
+    # #     os.remove(output_csv)
 
-    # # Run experiments for each solver
-    # for solver in solvers:
-    #     batch_runner(original_instance_file, solver, num_runs, output_csv)
+    # # # Run experiments for each solver
+    # # for solver in solvers:
+    # #     batch_runner(original_instance_file, solver, num_runs, output_csv)
 
-    # Plot success rates for all solvers
-    plot_success_rates(output_csv)
+    # # Plot success rates for all solvers
+    # plot_success_rates(output_csv)
 
     # File path to the text file containing costs PLOTTING COSTS
-    # file_path = "costs.txt"  # Replace with the actual path to your file
+    file_path = "costs.txt"  # Replace with the actual path to your file
 
-    # try:
-    #     # Parse the costs into two DataFrames
-    #     df1, df2 = parse_costs(file_path)
+    try:
+        # Parse the costs into two DataFrames
+        df1, df2 = parse_costs(file_path)
 
-    #     # Display the DataFrames
-    #     print("DataFrame 1:")
-    #     print(df1)
-    #     print("\nDataFrame 2:")
-    #     print(df2)
+        # Display the DataFrames
+        print("DataFrame 1:")
+        print(df1)
+        print("\nDataFrame 2:")
+        print(df2)
 
-    #     # Plot the costs
-    #     plot_costs(df1, df2)
+        # Plot the costs
+        plot_costs(df1, df2)
 
-    # except FileNotFoundError:
-    #     print(f"Error: The file '{file_path}' was not found.")
-    # except Exception as e:
-    #     print(f"An error occurred: {e}")
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 

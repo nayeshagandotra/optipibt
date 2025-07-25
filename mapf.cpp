@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
   std::string instance_file = "";
   std::string output_file = DEFAULT_OUTPUT_FILE;
   std::string solver_name;
+  std::string opti_deadline;
   bool verbose = false;
   char* argv_copy[argc + 1];
   for (int i = 0; i < argc; ++i) argv_copy[i] = argv[i];
@@ -34,6 +35,7 @@ int main(int argc, char* argv[])
       {"time-limit", required_argument, 0, 'T'},
       {"log-short", no_argument, 0, 'L'},
       {"make-scen", no_argument, 0, 'P'},
+      {"opti-timeout", required_argument, 0, 'M'},
       {0, 0, 0, 0},
   };
   bool make_scen = false;
@@ -43,7 +45,7 @@ int main(int argc, char* argv[])
   // command line args
   int opt, longindex;
   opterr = 0;  // ignore getopt error
-  while ((opt = getopt_long(argc, argv, "i:o:s:vhPT:L", longopts,
+  while ((opt = getopt_long(argc, argv, "i:o:s:vhPT:LM:", longopts,
                             &longindex)) != -1) {
     switch (opt) {
       case 'i':
@@ -54,6 +56,10 @@ int main(int argc, char* argv[])
         break;
       case 's':
         solver_name = std::string(optarg);
+        break;
+      case 'M':
+        // opti timeout
+        opti_deadline = std::string(optarg);
         break;
       case 'v':
         verbose = true;
@@ -97,6 +103,7 @@ int main(int argc, char* argv[])
   // solve
   auto solver = getSolver(solver_name, &P, verbose, argc, argv_copy);
   solver->setLogShort(log_short);
+  solver->time_limit_ms = std::stoi(opti_deadline);
   solver->solve();
   if (solver->succeed() && !solver->getSolution().validate(&P)) {
     std::cout << "error@mapf: invalid results" << std::endl;

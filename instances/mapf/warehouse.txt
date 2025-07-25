@@ -1,10 +1,10 @@
 ## ==== necessary ====
 ## .map file, put your maps in /map folder
-map_file=den520d.map
+map_file=warehouse-10-20-10-2-1.map
 ## map_file=den520d.map
 
 ## number of agents
-agents=50
+agents=80
 
 ## ==== custom =======
 ## seed of randomization
@@ -26,3 +26,23 @@ max_comp_time=60000
 ## (0, 0): left-top corner
 # 0,0,4,0
 
+
+148,55,15,24
+122,52,73,61
+55,49,58,30
+44,22,61,16
+98,46,103,7
+73,49,111,61
+141,59,157,13
+5,4,4,27
+36,21,44,31
+147,50,70,4
+116,40,74,31
+87,49,31,10
+53,37,153,43
+93,31,68,37
+97,43,14,59
+4,41,69,11
+95,10,115,7
+149,48,2,28
+113,51,113,39

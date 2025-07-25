@@ -156,6 +156,23 @@ protected:
 public:
   int getLowerBoundSOC();       // get trivial lower bound of sum-of-costs
   int getLowerBoundMakespan();  // get trivial lower bound of makespan
+  std::chrono::steady_clock::time_point start_time; // Start time of the operation
+  int time_limit_ms;
+  int time_limit_ns;
+  void start_timer() {
+    start_time = std::chrono::steady_clock::now();
+    // std::cout << "Start time: " << std::chrono::duration_cast<std::chrono::nanoseconds>(start_time.time_since_epoch()).count() << " ns" << std::endl;
+  }
+  bool is_expired() {
+    auto now = std::chrono::steady_clock::now();
+    std::cout << "time passed" << std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() << " s" << std::endl;
+    return now >= (start_time + std::chrono::microseconds(time_limit_ms));
+  }
+  bool is_expired_ns() {
+    auto now = std::chrono::steady_clock::now();
+    // std::cout << "time passed" << std::chrono::duration_cast<std::chrono::nanoseconds>(now - start_time).count() << " ns" << std::endl;
+    return now >= (start_time + std::chrono::nanoseconds(time_limit_ns));
+  }
 private:
   void computeLowerBounds();  // compute lb_soc and lb_makespan
 

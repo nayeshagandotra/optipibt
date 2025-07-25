@@ -1,3 +1,4 @@
 .DS_Store
 /build/
-/instances/toy.txt
+/instances/toy.txtoutputs/
+/outputs/
