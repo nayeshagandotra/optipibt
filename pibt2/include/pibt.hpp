@@ -62,6 +62,7 @@ private:
 
   std::vector<int> pens1; //logging
   std::vector<int> pens2; //logging
+  std::vector<double> times1; //logging
 
   // Initialize pens with the appropriate number of inner vectors
   std::vector<std::vector<int>> pens;
@@ -86,6 +87,7 @@ private:
   std::pair<bool, int> OptiPIBT(Agents A, Agent* aj, int accumulated_penalty);
   void group_optipibt(Agents A);
   void print_penalty(const std::string& filename, std::vector<int> penalties);
+  void print_times(const std::string& filename, std::vector<double> times);
   int calculate_penalty(Agent* a);
 
   // clear lists and update so we can run again

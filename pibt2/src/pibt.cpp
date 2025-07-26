@@ -29,25 +29,43 @@ void PIBT::print_penalty(const std::string& filename, std::vector<int> penalties
     outFile.close();
 }
 
+void PIBT::print_times(const std::string& filename, std::vector<double> times) {
+    std::string full_filename = filename;
+
+    // Open file in append mode
+    std::ofstream outFile(full_filename, std::ios::app);
+    if (!outFile) {
+        std::cerr << "Error opening file: " << full_filename << "\n";
+        return;
+    }
+
+    // Write each penalty to the file
+    for (int time : times) {
+        outFile << time << "\n";
+    }
+
+    outFile.close();
+}
+
 int PIBT::calculate_penalty(Agent* a) {
 
   // A two nodes
-  auto compare = [&](Node* const v, Node* const u) {
-    int d_v = pathDist(a->id, v);
-    int d_u = pathDist(a->id, u);
-    if (d_v != d_u) return d_v < d_u;
-    // tie break
-    if (occupied_now[v->id] != nullptr && occupied_now[u->id] == nullptr)
-      return false;
-    if (occupied_now[v->id] == nullptr && occupied_now[u->id] != nullptr)
-      return true;
-    return false;
-  };
+  // auto compare = [&](Node* const v, Node* const u) {
+  //   int d_v = pathDist(a->id, v);
+  //   int d_u = pathDist(a->id, u);
+  //   if (d_v != d_u) return d_v < d_u;
+  //   // tie break
+  //   if (occupied_now[v->id] != nullptr && occupied_now[u->id] == nullptr)
+  //     return false;
+  //   if (occupied_now[v->id] == nullptr && occupied_now[u->id] != nullptr)
+  //     return true;
+  //   return false;
+  // };
 
-  Nodes C = a->v_now->neighbor;
-  C.push_back(a->v_now);
+  // Nodes C = a->v_now->neighbor;
+  // C.push_back(a->v_now);
 
-  std::sort(C.begin(), C.end(), compare);
+  // std::sort(C.begin(), C.end(), compare);
 
   // calculate ideal dist for penalty purposes
   int ideal_dist = pathDist(a->id, a->C[0]);  // Distance to goal if taking ideal move
@@ -71,7 +89,7 @@ void PIBT::group_optipibt(Agents A){
   if (timestep_penalty != 0){
     group_no = 0;
     start_timer(); //&& !is_expired()
-    double overall_deadline = time_limit_ms;
+    double overall_deadline = time_limit_ms * 1000000;
     for (size_t gn = 0; gn < groups.size(); ++gn) {
 
         // if (is_expired()) break;
@@ -93,14 +111,14 @@ void PIBT::group_optipibt(Agents A){
           a->v_next_best = a->v_next;
         }
 
-        time_limit_ns = overall_deadline * 1000; // Convert micros to ns
+        time_limit_ns = overall_deadline; // Convert micros to ns
         time_limit_ns *= static_cast<double>(num_agents) / num_grouped_agents;
         // std::cout << num_agents << num_grouped_agents << std::endl;
 
         auto start = std::chrono::high_resolution_clock::now();
         auto [failed, bas] = OptiPIBT(A_copy, nullptr, 0);
         auto stop = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start).count();
+        auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start).count();
 
         bool group_exists = false;
         for (size_t i = group_no + 1; i < groups.size(); ++i) {
@@ -125,6 +143,7 @@ void PIBT::group_optipibt(Agents A){
             a->v_next = a->v_next_best;
         }
     }
+    times1.push_back(time_limit_ms * 1000000 - overall_deadline);
     for (auto a : A){
       if (a->v_next_best == nullptr){
         a->v_next_best = a->v_next; // for non-conflicting agents, this should be populated with the pibt answers
@@ -267,7 +286,7 @@ std::pair<bool, int> PIBT::OptiPIBT(Agents A, Agent* aj, int accumulated_penalty
     refresh_lists(A); // clear the results from the last PIBT call
     // std::cout << is_expired() << std::endl;
     if (is_expired()){
-      std::cout << "OptiPIBT expired, returning failure" << std::endl;
+      // std::cout << "OptiPIBT expired, returning failure" << std::endl;
       return std::make_pair(true, 100000);
     }
     n_avail_acts += 1;
@@ -497,7 +516,7 @@ void PIBT::run()
     // success
     if (check_goal_cond) {
       solved = true;
-      // print_penalty("costs1.txt", pens1);
+      print_times("times1.txt", times1);
 
       // int i = 0;
       // for (const auto& pen : pens) {

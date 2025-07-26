@@ -165,8 +165,8 @@ public:
   }
   bool is_expired() {
     auto now = std::chrono::steady_clock::now();
-    std::cout << "time passed" << std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() << " s" << std::endl;
-    return now >= (start_time + std::chrono::microseconds(time_limit_ms));
+    // std::cout << "time passed" << std::chrono::duration_cast<std::chrono::milliseconds>(now - start_time).count() << " s" << std::endl;
+    return now >= (start_time + std::chrono::milliseconds(time_limit_ms));
   }
   bool is_expired_ns() {
     auto now = std::chrono::steady_clock::now();

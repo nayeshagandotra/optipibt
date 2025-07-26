@@ -156,8 +156,10 @@ def pibt_batch_runner(instance_file, output_csv, map_folder, max_time_threshold=
         num_success_64 = 25
         num_success_256 = 25
         num_success = 25
+        sceni = 0
         for scen_file in scen_files:
             scen_file_path = os.path.join(map_folder, scen_file)
+            sceni += 1
             
             skip_loop = False
         
@@ -165,7 +167,7 @@ def pibt_batch_runner(instance_file, output_csv, map_folder, max_time_threshold=
             for solver_name in ["PIBT", "PIBTOLD"]:
                 opti_deadline = 0
                 if solver_name == "PIBT":
-                    for opti_deadline in [4, 256]:  # From 0ms to 1s inclusive
+                    for opti_deadline in [1000]:  # 1s
 
                         temp_instance_file = f"temp_instance_{scen_file}_{N}.txt"
                         positions = parse_scen_file(scen_file_path, N)
@@ -183,8 +185,12 @@ def pibt_batch_runner(instance_file, output_csv, map_folder, max_time_threshold=
                         output_file = f"outputs/output_{solver_name}_scen_{scen_file}_na{N}.txt"
                         stdout, stderr = run_experiment(temp_instance_file, output_file, solver_name, str(opti_deadline))
 
+                        cost_file_1 = f"outputs/times1htc_{sceni}_{N}.txt"
                         # Clean up the temporary file
                         os.remove(temp_instance_file)
+                        # move the file if it exists
+                        if os.path.exists("times1.txt"):
+                            os.rename("times1.txt", cost_file_1)
 
                         # Parse the result file for output data
                         parsed_data = parse_result_txt(output_file)
